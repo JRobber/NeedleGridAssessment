@@ -1,0 +1,105 @@
+<html ng-app="needleApp">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular.min.js"></script>
+</head>
+
+<body ng-controller="needleCtrl as nd">
+    <table class="needle-grid-table">
+        <tr>
+            <th>Col 1</th>
+            <th>Col 2</th>
+            <th>Col 3</th>
+            <th>Col 4</th>
+            <th>Col 5</th>
+            <th>Col 6</th>
+            <th class="last">Total</th>
+        </tr>
+        <tr ng-repeat="row in nd.rows">
+            <td ng-repeat="cell in row.cells" class="table-column">
+                <input type="text" ng-model="cell.value" ng-blur="cell.handleBlur()"></input>
+            </td>
+            <td>
+                {{row.sum | currency : "$" : 0}}
+            </td>
+        </tr>
+        <tr>
+            <td ng-repeat="col in nd.columnSums track by $index">
+                {{col | currency : "$" : 0}}
+            </td>
+        </tr>
+    </table>
+</body>
+<script>
+angular.module("needleApp", []);
+
+angular.module('needleApp').controller("needleCtrl", ["RowBuilder", function(rowbuilder) {
+
+    this.rows = [];
+    this.columnSums = [0, 0, 0, 0, 0, 0, 0];
+    var vm = this;
+
+    //updates the sum for the specified row by the modifier
+    this.updateRow = function(rowIndex, mod) {
+        vm.rows[rowIndex].sum = vm.rows[rowIndex].sum + mod;
+
+        //If we're modifying the last row we need to add a new row
+        if (rowIndex === vm.rows.length - 1 && mod !== 0) {
+            vm.addNewRow();
+        }
+    };
+    //updates the sum for the specified column by the modifier
+    this.updateColumn = function(colIndex, mod) {
+        vm.columnSums[colIndex] = vm.columnSums[colIndex] + (mod * (colIndex + 1));
+    };
+
+    //Initializes a new row object
+    this.addNewRow = function() {
+        var newRow = new rowbuilder(vm.rows.length, 6, vm.updateRow, vm.updateColumn);
+        newRow.sum = 0;
+        vm.rows.push(newRow);
+    }
+
+    //Create the first row
+    this.addNewRow();
+}]);
+
+angular.module('needleApp').factory('RowBuilder', function() {
+
+    //Build a row that knows:  which rowIndex it is, how many cells to build
+    //and how to handle updating a row or a columns sums
+    var row = function(rowIndex, cellCount, updateRowSum, updateColumnSum) {
+        this.rowIndex = rowIndex;
+        this.cells = [];
+
+        //Cell object knows: rowIndex, columnIndex and value
+        //Also stores previous value so we can send the difference to the update functions
+        var cell = function(rowIdx, column, defaultValue) {
+            this.row = rowIdx;
+            this.column = column;
+            this.value = defaultValue;
+            this.prevValue = this.value;
+        }
+
+        //Trigger updates when cell loses focus
+        cell.prototype.handleBlur = function() {
+            //Get the difference between the old and new value
+            var diff = (this.value - this.prevValue);
+            this.prevValue = this.value;
+
+            //Send the difference to update the row and column sums
+            updateRowSum(this.row, diff);
+            updateColumnSum(this.column, diff);
+        }
+
+        //Add new cells to the row        
+        for (var i = 0; i < cellCount; i++) {
+            this.cells.push(new cell(rowIndex, i, 0));
+        }
+    }
+    return row;
+})
+</script>
+
+</html>

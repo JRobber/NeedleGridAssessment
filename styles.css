@@ -1,0 +1,32 @@
+.needle-grid-table {
+    width: 100%;
+    border: 1px solid #eee;
+    margin: 30px auto;
+    border-collapse: collapse;
+    font-family: 'Arial';
+    border-bottom: 2px solid #42A5F5;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.10), 0px 10px 20px rgba(0, 0, 0, 0.05), 0px 20px 20px rgba(0, 0, 0, 0.05), 0px 30px 20px rgba(0, 0, 0, 0.05);
+}
+
+.needle-grid-table td,
+.needle-grid-table th {
+    border: 1px solid #eee;
+    color: #666;
+    border-collapse: collapse;
+}
+/*.needle-grid-table tr:first-child {
+    background: #42A5F5;
+    color: fff;
+    font-size: 12px;
+}
+*/
+
+.needle-grid-table th {
+    background: #42A5F5;
+    color: fff;
+    font-size: 14px;
+}
+
+.needle-grid-table th.last {
+    border-right: none;
+}
